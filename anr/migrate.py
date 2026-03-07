@@ -19,8 +19,7 @@ def run_migrate(repo_path: Path) -> int:
         print(f"Repository path does not exist or is not a directory: {repo_path}")
         return 1
 
-    layout = scan_repository(repo_path)
-    detected_dirs = layout["detected_dirs"]
+    detected_dirs = scan_repository(repo_path)
 
     created_agents = _write_if_missing(repo_path / "AGENTS.md", render_agents_md())
     created_context = _write_if_missing(

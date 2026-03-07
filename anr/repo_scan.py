@@ -2,25 +2,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
-COMMON_DIRECTORIES = ["src", "lib", "app", "tests", "scripts", "docs"]
+COMMON_DIRECTORIES = ["src", "app", "backend", "frontend", "lib", "scripts", "tests", "docs"]
 
 
-def scan_repository(repo_path: Path) -> dict[str, object]:
-    directories = {}
-    detected_dirs = []
-
+def scan_repository(repo_path: Path) -> list[str]:
+    detected_dirs: list[str] = []
     for name in COMMON_DIRECTORIES:
-        path = repo_path / name
-        exists = path.is_dir()
-        directories[name] = {
-            "path": name,
-            "exists": exists,
-        }
-        if exists:
+        if (repo_path / name).is_dir():
             detected_dirs.append(name)
-
-    return {
-        "root": str(repo_path.resolve()),
-        "directories": directories,
-        "detected_dirs": detected_dirs,
-    }
+    return detected_dirs
