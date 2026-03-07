@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from .init import run_init
+from .apply import apply_plan
 from .migrate import run_migrate
 from .plan import generate_plan
 from .upgrade import upgrade_repository
@@ -34,6 +35,11 @@ def build_parser() -> argparse.ArgumentParser:
     plan_parser = subparsers.add_parser("plan", help="Analyze repository and generate ANR migration suggestions.")
     plan_parser.add_argument("path", nargs="?", default=".", help="Repository directory path.")
     plan_parser.add_argument("--json", action="store_true", help="Print the plan as JSON.")
+
+    apply_parser = subparsers.add_parser("apply", help="Apply deterministic ANR refactor actions.")
+    apply_parser.add_argument("path", nargs="?", default=".", help="Repository directory path.")
+    apply_parser.add_argument("--dry-run", action="store_true", help="Show actions without executing them.")
+    apply_parser.add_argument("--auto", action="store_true", help="Execute planned actions.")
 
     return parser
 
@@ -102,6 +108,16 @@ def main(argv: list[str] | None = None) -> int:
         else:
             _print_human_plan(plan)
         return 0
+    if args.command == "apply":
+        try:
+            plan = generate_plan(str(target))
+        except ValueError as exc:
+            print(str(exc))
+            return 1
+        run_dry = True
+        if args.auto and not args.dry_run:
+            run_dry = False
+        return apply_plan(str(target), plan, dry_run=run_dry)
 
     parser.print_help()
     return 1
