@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from .llm import get_provider_from_env
 from .repo_scan import scan_repository
 
 ROOT_SCRIPT_EXTENSIONS = {".sh", ".bash", ".ps1", ".bat", ".cmd"}
@@ -99,4 +100,20 @@ def generate_plan(repo_path: str) -> dict[str, object]:
         "suggested_upgrades": _upgrade_suggestions(components),
         "structural_suggestions": _structural_suggestions(repo_root),
     }
+
+    provider = get_provider_from_env()
+    if provider is not None:
+        summary = (
+            "Repository analysis summary\n"
+            f"Detected directories: {', '.join(detected_dirs) if detected_dirs else 'none'}\n"
+            f"Current ANR level: {plan['current_level']}\n"
+            f"Missing ANR components: {', '.join(missing_components) if missing_components else 'none'}\n"
+            f"Structural suggestions: {', '.join(plan['structural_suggestions']) if plan['structural_suggestions'] else 'none'}\n"
+            "Suggest up to five additional migration/refactor actions as bullet points."
+        )
+        try:
+            plan["llm_suggestions"] = provider.generate(summary)
+        except Exception as exc:
+            plan["llm_error"] = str(exc)
+
     return plan

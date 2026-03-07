@@ -68,6 +68,15 @@ def _print_human_plan(plan: dict[str, object]) -> None:
     else:
         print("* no structural issues detected")
 
+    if "llm_suggestions" in plan:
+        print("")
+        print("LLM suggestions:")
+        print(str(plan["llm_suggestions"]))
+    elif "llm_error" in plan:
+        print("")
+        print("LLM analysis error:")
+        print(str(plan["llm_error"]))
+
 
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()

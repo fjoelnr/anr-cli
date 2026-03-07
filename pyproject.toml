@@ -13,5 +13,5 @@ authors = [{ name = "ANR Contributors" }]
 [project.scripts]
 anr = "anr.cli:main"
 
-[tool.setuptools]
-packages = ["anr"]
+[tool.setuptools.packages.find]
+include = ["anr*"]
