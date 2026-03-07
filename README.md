@@ -19,6 +19,7 @@ ANR architecture adds a structured context layer for coding agents. ANR CLI auto
 - validate compliance level based on available ANR components
 - upgrade repositories to higher ANR levels
 - generate migration plans without modifying repositories
+- apply deterministic repository refactors from a generated plan
 
 ## Installation
 
@@ -37,6 +38,8 @@ anr upgrade --level 2
 anr upgrade --level 3
 anr plan
 anr plan --json
+anr apply --dry-run
+anr apply --auto
 ```
 
 ## Commands
@@ -46,6 +49,7 @@ anr plan --json
 - `anr validate [path]`: report ANR compliance level and missing required files
 - `anr upgrade [path] --level <2|3>`: upgrade repository structure to a higher ANR compliance level
 - `anr plan [path] [--json]`: analyze repository and print a migration plan (read-only)
+- `anr apply [path] [--dry-run|--auto]`: execute deterministic refactor actions from `anr plan`
 
 ## Compliance Levels
 
@@ -68,4 +72,23 @@ Optional LLM suggestions can be enabled with environment variables:
 - `ANR_LLM_PROVIDER=openai` and `ANR_API_KEY=...`
 - `ANR_LLM_PROVIDER=ollama` (uses local Ollama endpoint)
 
-`anr apply` is planned as a future command that will execute a selected migration plan.
+## Apply
+
+`anr apply` executes deterministic structural refactors based on the generated plan:
+
+- move files into `scripts/`, `tests/`, and `src/` based on deterministic rules
+- create missing target directories when needed
+- refresh `.agents/context-index.md` after changes
+
+Safety behavior:
+
+- never deletes files automatically
+- never overwrites existing files
+- prints planned actions before execution
+
+Recommended workflow:
+
+1. `anr migrate`
+2. `anr plan`
+3. `anr apply --dry-run`
+4. `anr apply --auto`
