@@ -28,7 +28,7 @@ def _move_file(repo_root: Path, source_rel: str, target_rel: str) -> tuple[bool,
     source = repo_root / source_rel
     target = repo_root / target_rel
 
-    if not source.exists() or not source.is_file():
+    if not source.exists():
         return False, f"skip move (missing source): {source_rel}"
     if target.exists():
         return False, f"skip move (target exists): {target_rel}"

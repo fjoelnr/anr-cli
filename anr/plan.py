@@ -7,6 +7,7 @@ from .repo_scan import scan_repository
 
 ROOT_SCRIPT_EXTENSIONS = {".sh", ".bash", ".ps1", ".bat", ".cmd"}
 ROOT_SOURCE_EXTENSIONS = {".py", ".js", ".jsx", ".ts", ".tsx", ".go", ".rs", ".java", ".rb"}
+ROOT_TEST_FILE_MARKERS = ("test_", "_test")
 
 
 def _has_visible_content(directory: Path) -> bool:
@@ -47,22 +48,61 @@ def _compliance_level(components: dict[str, bool]) -> int:
     return 0
 
 
-def _structural_suggestions(repo_root: Path) -> list[str]:
+def _root_test_file(path: Path) -> bool:
+    stem = path.stem.lower()
+    name = path.name.lower()
+    return any(marker in stem for marker in ROOT_TEST_FILE_MARKERS) or name.endswith(".spec.py")
+
+
+def _build_actions(repo_root: Path) -> list[dict[str, str]]:
+    actions: list[dict[str, str]] = []
+    needed_dirs: set[str] = set()
+
+    for child in repo_root.iterdir():
+        if not child.is_file():
+            continue
+        if child.suffix.lower() in ROOT_SCRIPT_EXTENSIONS:
+            needed_dirs.add("scripts")
+            actions.append({"type": "move_file", "from": child.name, "to": f"scripts/{child.name}"})
+
+    for child in repo_root.iterdir():
+        if not child.is_file():
+            continue
+        if child.suffix.lower() in ROOT_SOURCE_EXTENSIONS and _root_test_file(child):
+            needed_dirs.add("tests")
+            actions.append({"type": "move_file", "from": child.name, "to": f"tests/{child.name}"})
+
+    for child in repo_root.iterdir():
+        if not child.is_file():
+            continue
+        if child.suffix.lower() in ROOT_SOURCE_EXTENSIONS and not _root_test_file(child):
+            needed_dirs.add("src")
+            actions.append({"type": "move_file", "from": child.name, "to": f"src/{child.name}"})
+
+    for child in repo_root.iterdir():
+        if child.is_dir() and child.name.lower() in {"test", "testsuite", "spec", "specs"} and child.name != "tests":
+            needed_dirs.add("tests")
+            actions.append({"type": "move_file", "from": child.name, "to": f"tests/{child.name}"})
+
+    for directory in sorted(needed_dirs):
+        if not (repo_root / directory).exists():
+            actions.insert(0, {"type": "create_directory", "path": directory})
+
+    if actions:
+        actions.append({"type": "update_context_index"})
+    return actions
+
+
+def _actions_to_suggestions(actions: list[dict[str, str]]) -> list[str]:
     suggestions: list[str] = []
-
-    for child in repo_root.iterdir():
-        if child.is_file() and child.suffix.lower() in ROOT_SCRIPT_EXTENSIONS:
-            suggestions.append(f"Move {child.name} -> scripts/{child.name}")
-
-    for child in repo_root.iterdir():
-        if child.is_dir() and child.name.lower() in {"test", "testsuite", "spec", "specs"}:
-            if child.name != "tests":
-                suggestions.append(f"Move {child.name}/ -> tests/{child.name}/")
-
-    for child in repo_root.iterdir():
-        if child.is_file() and child.suffix.lower() in ROOT_SOURCE_EXTENSIONS:
-            suggestions.append(f"Move {child.name} -> src/{child.name}")
-
+    for action in actions:
+        kind = action["type"]
+        if kind == "move_file":
+            suggestions.append(f"Move {action['from']} -> {action['to']}")
+        elif kind == "create_directory":
+            suggestions.append(f"Create {action['path']}/")
+        elif kind == "update_context_index":
+            suggestions.append("Update .agents/context-index.md")
     return suggestions
 
 
@@ -91,6 +131,7 @@ def generate_plan(repo_path: str) -> dict[str, object]:
     detected_dirs = scan_repository(repo_root)
     components = _component_state(repo_root)
     missing_components = [name for name, exists in components.items() if not exists]
+    actions = _build_actions(repo_root)
     plan = {
         "repo_path": str(repo_root),
         "detected_directories": detected_dirs,
@@ -98,7 +139,8 @@ def generate_plan(repo_path: str) -> dict[str, object]:
         "missing_components": missing_components,
         "current_level": _compliance_level(components),
         "suggested_upgrades": _upgrade_suggestions(components),
-        "structural_suggestions": _structural_suggestions(repo_root),
+        "structural_suggestions": _actions_to_suggestions(actions),
+        "actions": actions,
     }
 
     provider = get_provider_from_env()
