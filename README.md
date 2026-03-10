@@ -1,94 +1,80 @@
 # ANR CLI
 
-ANR CLI is a minimal Python command-line tool that helps convert repositories into the ANR (AI Native Repository) architecture.
+ANR CLI exists for one practical reason:
+help turn normal repositories into AI Native Repositories.
 
-## Purpose
+Repositories were built for humans.  
+ANR makes them readable for agents.
 
-The tool bootstraps and validates the core files needed for AI-native collaboration:
+## Why This Tool Exists
 
-- `AGENTS.md`
-- `.agents/context-index.md`
-- `anr.yaml`
+The ANR idea is simple:
 
-## Relationship to AI Native Repository Architecture
+- `AGENTS.md` should hold the why, the map, and the rules
+- local `AGENT.md` files should live near sharp edges
+- skills should capture reusable expert modes
+- workflows should explain how work gets done
+- guardrails should define what must stay deterministic
 
-ANR architecture adds a structured context layer for coding agents. ANR CLI automates the first migration steps:
+Most repositories do not start that way.
+They have to be migrated.
 
-- scan repository layout (`src`, `app`, `backend`, `frontend`, `lib`, `scripts`, `tests`, `docs`)
-- generate missing ANR context files
-- validate compliance level based on available ANR components
-- upgrade repositories to higher ANR levels
-- generate migration plans without modifying repositories
-- apply deterministic repository refactors from a generated plan
+ANR CLI is the practical migration tool for that job.
 
-## Installation
+## What It Helps Create
 
-```bash
-pip install -e .
-```
+- `AGENTS.md` -> repo memory
+- `.agents/context-index.md` -> repository map
+- `.agents/workflows/` -> repeatable procedures
+- `.agents/skills/` -> reusable reasoning
+- `.agents/guardrails/` -> safety constraints
+- `anr.yaml` -> machine-readable manifest
 
-## Usage
+The goal is not more documentation for its own sake.
+The goal is to make a repository feel project-native to an AI coding agent.
+
+## Core Workflow
 
 ```bash
 anr init
-anr init my-project
 anr migrate .
 anr validate
-anr upgrade --level 2
-anr upgrade --level 3
-anr plan
-anr plan --json
-anr apply --dry-run
-anr apply --auto
 ```
 
-## Commands
+Typical use:
 
-- `anr init [path]`: initialize project folders and run migration bootstrap
-- `anr migrate [path]`: analyze repository and create missing ANR files
-- `anr validate [path]`: report ANR compliance level and missing required files
-- `anr upgrade [path] --level <2|3>`: upgrade repository structure to a higher ANR compliance level
-- `anr plan [path] [--json]`: analyze repository and print a migration plan (read-only)
-- `anr apply [path] [--dry-run|--auto]`: execute deterministic refactor actions from `anr plan`
+1. initialize a greenfield repository with ANR basics
+2. migrate an existing repository toward ANR structure
+3. validate that the expected context layer exists
+
+## Available Commands
+
+- `anr init [path]`
+- `anr migrate [path]`
+- `anr validate [path]`
+- `anr upgrade [path] --level <2|3>`
+- `anr plan [path] [--json]`
+- `anr apply [path] [--dry-run|--auto]`
 
 ## Compliance Levels
 
-- Level 0: not ANR
-- Level 1: `AGENTS.md` + `.agents/context-index.md`
-- Level 2: workflows present (`.agents/workflows/` has files)
-- Level 3: skills + guardrails present (and workflows)
+- Level 0 -> not ANR
+- Level 1 -> `AGENTS.md` + `.agents/context-index.md`
+- Level 2 -> local context and workflows
+- Level 3 -> skills, guardrails, and manifest
 
-`anr upgrade` helps move a repository from lower levels to Level 2 or Level 3 by creating the required workflow, skill, and guardrail files if they are missing.
+## The Real Use Case
 
-## Planning
+The important use case is not scaffolding toy repositories.
+It is upgrading real projects so agents can continue working there more efficiently.
 
-Use `anr plan` to analyze the repository and propose ANR migration improvements without writing files.
+Typical prompt:
 
-- `anr plan`: human-readable migration suggestions
-- `anr plan --json`: structured output for automation
+`Convert this repository to ANR.`
 
-Optional LLM suggestions can be enabled with environment variables:
+Expected outcome:
 
-- `ANR_LLM_PROVIDER=openai` and `ANR_API_KEY=...`
-- `ANR_LLM_PROVIDER=ollama` (uses local Ollama endpoint)
-
-## Apply
-
-`anr apply` executes deterministic structural refactors based on the generated plan:
-
-- move files into `scripts/`, `tests/`, and `src/` based on deterministic rules
-- create missing target directories when needed
-- refresh `.agents/context-index.md` after changes
-
-Safety behavior:
-
-- never deletes files automatically
-- never overwrites existing files
-- prints planned actions before execution
-
-Recommended workflow:
-
-1. `anr migrate`
-2. `anr plan`
-3. `anr apply --dry-run`
-4. `anr apply --auto`
+- clearer repository memory
+- fewer repeated prompts
+- more consistent agent behavior
+- safer edits in risky areas
