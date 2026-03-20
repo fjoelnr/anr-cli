@@ -21,6 +21,19 @@ They have to be migrated.
 
 ANR CLI is the practical migration tool for that job.
 
+## What This Repository Is For
+
+This repository is the implementation home of the ANR command-line tool.
+
+Use it when you want to:
+
+- bootstrap a new repository with ANR basics
+- migrate an existing repository toward ANR structure
+- validate whether an existing repository actually meets ANR expectations
+
+This is not just a concept repo.
+It is the executable layer that should make ANR practical in day-to-day repository work.
+
 ## What It Helps Create
 
 - `AGENTS.md` -> repo memory
@@ -41,6 +54,20 @@ anr migrate .
 anr validate
 ```
 
+## Install
+
+```bash
+pip install -e .
+anr validate
+```
+
+For local development:
+
+```bash
+python -m pip install -e .
+python -m anr.cli validate
+```
+
 Typical use:
 
 1. initialize a greenfield repository with ANR basics
@@ -55,6 +82,20 @@ Typical use:
 - `anr upgrade [path] --level <2|3>`
 - `anr plan [path] [--json]`
 - `anr apply [path] [--dry-run|--auto]`
+
+## Current Status
+
+- repository role: implementation repo for the ANR CLI
+- maturity: early but usable for local migration and validation experiments
+- packaging: Python package via `pyproject.toml`
+- default branch flow: `feature -> develop -> main`
+
+## Key Links
+
+- Status: [docs/STATUS.md](docs/STATUS.md)
+- Architecture: [docs/architecture.md](docs/architecture.md)
+- Compliance Levels: [docs/compliance-levels.md](docs/compliance-levels.md)
+- ANR Positioning: [docs/anr-positioning.md](docs/anr-positioning.md)
 
 ## Compliance Levels
 
