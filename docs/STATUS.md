@@ -10,12 +10,14 @@ Its job is to make AI Native Repository migration and validation executable inst
 
 - Python package entry point via `anr.cli:main`
 - baseline command set for init, migrate, validate, upgrade, plan, and apply
+- stack-aware `init --profile` for the initial ANR bootstrap path
 - ANR-oriented repository structure and validation workflows
 - supporting docs for compliance levels, positioning, and architecture
 
 ## What Still Needs Care
 
 - command behavior should stay aligned with the actual ANR spec and migration workflow
+- profile coverage is intentionally small and should grow only when repeated repo patterns justify it
 - examples and docs need to be updated whenever command behavior changes
 - packaging and local developer workflow should remain simple and deterministic
 
