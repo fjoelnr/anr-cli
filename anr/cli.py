@@ -8,6 +8,7 @@ from .init import run_init
 from .apply import apply_plan
 from .migrate import run_migrate
 from .plan import generate_plan
+from .profiles import list_profiles
 from .upgrade import upgrade_repository
 from .validate import run_validate
 
@@ -21,6 +22,16 @@ def build_parser() -> argparse.ArgumentParser:
 
     init_parser = subparsers.add_parser("init", help="Initialize an ANR-ready repository.")
     init_parser.add_argument("path", nargs="?", default=".", help="Project directory path.")
+    init_parser.add_argument(
+        "--profile",
+        choices=list_profiles(),
+        help="Apply a stack profile after initializing the ANR baseline.",
+    )
+    init_parser.add_argument(
+        "--list-profiles",
+        action="store_true",
+        help="Print the available stack profiles and exit.",
+    )
 
     migrate_parser = subparsers.add_parser("migrate", help="Migrate an existing repository to ANR.")
     migrate_parser.add_argument("path", nargs="?", default=".", help="Repository directory path.")
@@ -90,7 +101,12 @@ def main(argv: list[str] | None = None) -> int:
     target = Path(args.path).resolve()
 
     if args.command == "init":
-        return run_init(target)
+        if args.list_profiles:
+            print("Available stack profiles:")
+            for profile_name in list_profiles():
+                print(f"* {profile_name}")
+            return 0
+        return run_init(target, profile=args.profile)
     if args.command == "migrate":
         return run_migrate(target)
     if args.command == "validate":
