@@ -71,22 +71,47 @@ python -m anr.cli validate
 Typical use:
 
 1. initialize a greenfield repository with ANR basics
-2. migrate an existing repository toward ANR structure
+2. optionally apply a stack profile during initialization
+3. migrate an existing repository toward ANR structure
 3. validate that the expected context layer exists
 
 ## Available Commands
 
 - `anr init [path]`
+- `anr init [path] --profile <java-spring|platformio-iot|mcp-infra>`
+- `anr init --list-profiles`
 - `anr migrate [path]`
 - `anr validate [path]`
 - `anr upgrade [path] --level <2|3>`
 - `anr plan [path] [--json]`
 - `anr apply [path] [--dry-run|--auto]`
 
+## Stack Profiles
+
+The CLI can now add a small, deterministic stack overlay during `init`.
+
+```bash
+anr init . --profile platformio-iot
+```
+
+Current profiles:
+
+- `java-spring`
+- `platformio-iot`
+- `mcp-infra`
+
+Profile application currently does three things:
+
+- adds a managed stack block to `AGENTS.md`
+- writes `anr.profile.yaml`
+- creates stack-specific docs only when they do not already exist
+
+This keeps the baseline ANR scaffold generic while still making new repositories useful on day one.
+
 ## Current Status
 
 - repository role: implementation repo for the ANR CLI
-- maturity: early but usable for local migration and validation experiments
+- maturity: early but usable for local migration, validation, and profile-based initialization
 - packaging: Python package via `pyproject.toml`
 - default branch flow: `feature -> develop -> main`
 
